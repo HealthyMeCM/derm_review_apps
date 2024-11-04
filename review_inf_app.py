@@ -3,8 +3,14 @@ import streamlit as st
 import boto3
 from botocore.exceptions import NoCredentialsError
 
-# Configure S3 client
-s3_client = boto3.client("s3")
+# Configure S3 client with credentials from Streamlit secrets
+s3_client = boto3.client(
+    "s3",
+    aws_access_key_id=st.secrets["aws_access_key_id"],
+    aws_secret_access_key=st.secrets["aws_secret_access_key"],
+    region_name=st.secrets["aws_region"]
+)
+
 
 def upload_file():
     """Handles file upload and checks if required columns exist."""
