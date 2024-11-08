@@ -21,7 +21,7 @@ def upload_file():
         uploaded_file = s3_client.generate_presigned_url(
             "get_object",
             Params={"Bucket": bucket, "Key": key},
-            ExpiresIn=expiration,
+            ExpiresIn=3600,
         )
         # return response
     except NoCredentialsError:
