@@ -14,14 +14,26 @@ s3_client = boto3.client(
 
 def upload_file():
     """Handles file upload and checks if required columns exist."""
-    uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+    # uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+    bucket = "derm-data-general"
+    key = "dev_set_2.csv"
+    try:
+        uploaded_file = s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket, "Key": key},
+            ExpiresIn=expiration,
+        )
+        # return response
+    except NoCredentialsError:
+        st.error("No AWS credentials found.")
+        return None
     if uploaded_file:
         df = pd.read_csv(uploaded_file)
         if "file_attachment_id" not in df.columns or "assign_class" not in df.columns:
             st.error("CSV must contain 'file_attachment_id' and 'assign_class' columns.")
-            return None, None
-        return df, uploaded_file.name
-    return None, None
+            return None
+        return df
+    return None
 
 def display_columns_selector(df):
     """Displays a multi-select for additional columns in the dataframe."""
@@ -96,7 +108,7 @@ def main():
     """Main function to run the application."""
     st.title("S3 Image Viewer with Metadata")
 
-    df, filename = upload_file()
+    df = upload_file()
     if df is not None:
         additional_columns = display_columns_selector(df)
 
